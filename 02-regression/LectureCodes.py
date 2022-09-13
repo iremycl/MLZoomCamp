@@ -4,6 +4,7 @@ import os
 
 os.chdir("/User")
 
+
 df = pd.read_csv("data.csv")
 df.head()
 
