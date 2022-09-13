@@ -10,4 +10,3 @@ df.head()
 
 #Inconsistent column names
 df.columns.str.lower().str.replace(' ','_')
-df.head()
