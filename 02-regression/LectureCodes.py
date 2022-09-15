@@ -12,10 +12,16 @@ df.head()
 df.columns.str.lower().str.replace(' ','_')
 
 strings = list(df.dtypes[df.dtypes == "object"].index)
-
+strings
 for col in strings:
     df[col] = df[col].str.lower().str.replace(' ','_')
 
 df.head()
 
 ## EDA
+
+df.dtypes
+for col in df.columns:
+    print(col)
+    print(df[col].unique()[:5])
+    print(df[col].nunique())
