@@ -11,6 +11,12 @@ df.head()
 #Inconsistent column names
 df.columns = df.columns.str.lower().str.replace(' ','_')
 
+#and col values:
+string_columns = list(df.dtypes[df.dtypes == 'object'].index)
+
+for col in string_columns:
+    df[col] = df[col].str.lower().str.replace(' ', '_')
+
 df.head()
 
 ## EDA
@@ -49,9 +55,22 @@ n_val = int(len(df) * .2)
 n_test = int(len(df) * .2)
 #n_train  = int(len(df) * .6)
 #Cant use the above method because of the rounding.
+
 n_train  = n - n_val - n_test
 n_val, n_test, n_train
 
-df.iloc[n_val]
+# df_val = df.iloc[:n_val]
+# df_test = df.iloc[n_val:n_val+n_test]
+# df_train = df.iloc[n_val+n_test:]
+#The problem is that this is sequential, i.e. no bmws in the training data set, we need to shuffle:
 
+idx = np.arange(n)
+np.random.shuffle(idx)
 
+#Get the numbers through this shuffled index:
+
+df_train = df.iloc[idx[n_train]]
+df_val = df.iloc[idx[n_train:n_train+n_val]]
+df_test = df.iloc[idx[n_train+n_val:]]
+
+df.iloc[idx[:10]]
