@@ -1,3 +1,4 @@
+from statistics import linear_regression
 import numpy as np
 import pandas as pd
 import os
@@ -65,12 +66,62 @@ n_val, n_test, n_train
 #The problem is that this is sequential, i.e. no bmws in the training data set, we need to shuffle:
 
 idx = np.arange(n)
+np.random.seed(2) #to make the results reproducible
 np.random.shuffle(idx)
 
 #Get the numbers through this shuffled index:
 
-df_train = df.iloc[idx[n_train]]
+df_train = df.iloc[idx[:n_train]]
 df_val = df.iloc[idx[n_train:n_train+n_val]]
 df_test = df.iloc[idx[n_train+n_val:]]
 
 df.iloc[idx[:10]]
+
+len(df_train), len(df_val), len(df_test)
+
+df_train = df_train.reset_index(drop=True)
+df_val = df_val.reset_index(drop=True)
+df_test = df_test.reset_index(drop=True)
+
+y_train = np.log1p(df_train.msrp.values)
+y_val = np.log1p(df_val.msrp.values)
+y_test = np.log1p(df_test.msrp.values)
+
+del df_train['msrp']
+del df_val['msrp']
+del df_test['msrp']
+
+##Linear Regression
+
+df_train.iloc[10]
+
+xi = [453,11,86]
+
+w0 = 7.17
+w = [0.01,0.04,0.002]
+
+def linear_regression(xi):
+   n = len(xi)
+   pred = w0 
+   for j in range(n):
+       pred = pred + w[j] * xi[j] # Dot product!!
+   return pred
+
+linear_regression(xi)   
+np.expm1(linear_regression(xi)) 
+
+##Linear Regression vector form
+
+def dot(xi,w):
+    n = len(x1)
+    res = 0.0
+    for j in range(n):
+        res = res + xi[j] * w[j]
+    return res
+
+def linear_regression(xi):
+   n = len(xi)
+   pred = w0 
+   for j in range(n):
+       pred = pred + w[j] * xi[j] # Dot product!!
+   return w0 + dot(xi, w)
