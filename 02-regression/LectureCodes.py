@@ -113,15 +113,70 @@ np.expm1(linear_regression(xi))
 ##Linear Regression vector form
 
 def dot(xi,w):
-    n = len(x1)
+    n = len(xi)
     res = 0.0
     for j in range(n):
         res = res + xi[j] * w[j]
     return res
 
 def linear_regression(xi):
-   n = len(xi)
-   pred = w0 
-   for j in range(n):
-       pred = pred + w[j] * xi[j] # Dot product!!
    return w0 + dot(xi, w)
+
+# w = [w0,w1,....,wn] n+1 dim
+# xi = [xi0,xi1,xi2,...,xin] xi1 is 1 always:
+# wTXi = xiTw = w0 = ..
+
+w_new = [w0] + w
+w_new
+def linear_regression(xi):
+    xi = [1] + xi
+    return w0 + dot(xi, w_new)
+ 
+linear_regression(xi)
+
+x1=[1,148,24,1385]
+x2=[1,132,24,1385]
+x10=[1,453,11,86]
+X=[x1,x2,x10]
+
+X=np.array(X)
+def linear_regression(X):
+    return X.dot(w_new)
+
+#Training a linear regression model
+#How do we come with weights?
+# (X.T * X)^-1 * (X.T * X) * w = (X.T * X)^-1 * X.T * y
+
+def train_linear_regression(X,y):
+    #Find the w vector
+    pass
+
+X = [
+[148,24,1385],
+[132,25,2031],
+[453,11,86],
+[158,24,185],
+[172,25,201],
+[413,11,86],
+[38, 54,185],
+[142,25,431],
+[453,31,86]
+]
+
+#Bias term - baseline
+ones = np.ones(X.shape[0])
+ones
+X = np.column_stack([ones, X])
+
+y =  [10000,20000,15000,20050,10000,20000,15000,25000,12000]
+X=np.array(X)
+X
+XTX =  X.T.dot(X)
+XTX_inv = np.linalg.inv(XTX)
+XTX.dot(XTX_inv)
+
+w_full = XTX_inv.dot(X.T).dot(y)
+w_full
+w0 = w_full[0]
+w = w_full[1:]
+w0, w
