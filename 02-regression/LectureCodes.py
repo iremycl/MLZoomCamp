@@ -1,4 +1,5 @@
 from statistics import linear_regression
+from unicodedata import category
 import numpy as np
 import pandas as pd
 import os
@@ -147,10 +148,6 @@ def linear_regression(X):
 #How do we come with weights?
 # (X.T * X)^-1 * (X.T * X) * w = (X.T * X)^-1 * X.T * y
 
-def train_linear_regression(X,y):
-    #Find the w vector
-    pass
-
 X = [
 [148,24,1385],
 [132,25,2031],
@@ -165,18 +162,287 @@ X = [
 
 #Bias term - baseline
 ones = np.ones(X.shape[0])
-ones
 X = np.column_stack([ones, X])
 
 y =  [10000,20000,15000,20050,10000,20000,15000,25000,12000]
-X=np.array(X)
-X
-XTX =  X.T.dot(X)
-XTX_inv = np.linalg.inv(XTX)
-XTX.dot(XTX_inv)
 
-w_full = XTX_inv.dot(X.T).dot(y)
-w_full
-w0 = w_full[0]
-w = w_full[1:]
-w0, w
+def train_linear_regression(X,y):
+    #Find the w vector
+    ones = np.ones(X.shape[0])
+    X = np.column_stack([ones, X])
+    XTX =  X.T.dot(X)
+    XTX_inv = np.linalg.inv(XTX)
+    w_full = XTX_inv.dot(X.T).dot(y)
+
+    return w_full[0],w_full[1:]
+
+
+train_linear_regression(X,y)
+
+# Car price baseline model
+df_train.dtypes
+df_train.columns
+base = [
+    'engine_hp',
+    'engine_cylinders',
+    'highway_mpg',
+    'city_mpg',
+    'popularity'
+]
+
+X_train = df_train[base].values # to extract the numpy array
+train_linear_regression(X_train, y_train) # nan because of missing values
+
+X_train = df_train[base]. fillna(0).values # doesnt make sense, if for example the nan is in engine horsepower or cylinder, a car cant have 0 cylinders but easy to implement in this case
+w0, w = train_linear_regression(X_train, y_train)
+
+#Use to predict
+
+y_pred = w0 + X_train.dot(w)
+
+sns.histplot(y_pred, color = 'red', alpha=0.5, bins=50)
+sns.histplot(y_train, color = 'blue', alpha=0.5, bins=50)
+
+#Evaluating regression models - root mean squared error
+
+def rmse(y,y_pred):
+    se = (y - y_pred) ** 2
+    mse = se.mean()
+    return np.sqrt(mse)
+
+rmse(y_train, y_pred)
+
+#Use on validation
+
+base = [
+    'engine_hp',
+    'engine_cylinders',
+    'highway_mpg',
+    'city_mpg',
+    'popularity'
+]
+
+w0, w = train_linear_regression(X_train, y_train)
+
+y_pred = w0 + X_train.dot(w)
+
+def prepare_X(df):
+    df_num = df[base]
+    df_num = df_num.fillna(0)
+    X = df_num.values
+    return X
+
+X_train = prepare_X(df_train)
+w0, w = train_linear_regression(X_train, y_train)
+
+X_val = prepare_X(df_val)
+y_pred = w0 + X_val.dot(w)
+rmse(y_val, y_pred)
+
+# Improve the model!
+
+df_train # year is an important value!
+
+def prepare_X(df):
+    df = df.copy()
+    df['age'] = 2017 - df.year
+    features = base + ['age']
+
+    df_num = df[features]
+    df_num = df_num.fillna(0)
+    X = df_num.values
+    return X
+
+X_train = prepare_X(df_train)
+X_train # has 6 features ones, last is age
+
+w0, w = train_linear_regression(X_train, y_train)
+
+X_val = prepare_X(df_val)
+y_pred = w0 + X_val.dot(w)
+rmse(y_val, y_pred)
+
+sns.histplot(y_pred, color = 'red', alpha=0.5, bins=50)
+sns.histplot(y_val, color = 'blue', alpha=0.5, bins=50)
+
+# Categorical variables
+
+df_train.number_of_doors # looks numerical but its actually categorical
+
+def prepare_X(df):
+    df = df.copy()
+    features = base.copy()
+
+    df['age'] = 2017 - df.year
+    features.append('age')
+    
+    for v in [2,3,4]:
+        df['num_doors_%s' % v] = (df.number_of_doors == v).astype('int')
+        features.append('num_doors_%s' % v)
+
+    df_num = df[features]
+    df_num = df_num.fillna(0)
+    X = df_num.values
+    return X
+
+
+X_train = prepare_X(df_train)
+w0, w = train_linear_regression(X_train, y_train)
+
+X_val = prepare_X(df_val)
+y_pred = w0 + X_val.dot(w)
+
+rmse(y_val, y_pred) # Slightly improved, the number of doors is not that useful.
+
+
+makes = list(df.make.value_counts().head().index)
+
+def prepare_X(df):
+    df = df.copy()
+    features = base.copy()
+
+    df['age'] = 2017 - df.year
+    features.append('age')
+    
+    for v in [2,3,4]:
+        df['num_doors_%s' % v] = (df.number_of_doors == v).astype('int')
+        features.append('num_doors_%s' % v)
+
+    for v in makes:
+        df['make_%s' % v] = (df.make == v).astype('int')
+        features.append('make_%s' % v)
+
+    df_num = df[features]
+    df_num = df_num.fillna(0)
+    X = df_num.values
+    return X
+
+X_train = prepare_X(df_train)
+w0, w = train_linear_regression(X_train, y_train)
+
+X_val = prepare_X(df_val)
+y_pred = w0 + X_val.dot(w)
+
+rmse(y_val, y_pred)
+# Add more categorical variables
+df_train.dtypes
+
+categorical_variables = [
+    'make',
+    'engine_fuel_type',
+    'transmission_type',
+    'driven_wheels',
+    'market_category',
+    'vehicle_size',
+    'vehicle_style'
+]
+
+categories = {}
+
+for c in categorical_variables:
+    categories[c] = list(df[c].value_counts().head().index)
+
+
+def prepare_X(df):
+    df = df.copy()
+    features = base.copy()
+
+    df['age'] = 2017 - df.year
+    features.append('age')
+    
+    for v in [2,3,4]:
+        df['num_doors_%s' % v] = (df.number_of_doors == v).astype('int')
+        features.append('num_doors_%s' % v)
+    
+    for c, values in categories.items():
+        for v in values:
+            df['%s_%s' % (c, v)] = (df[c] == v).astype('int')
+            features.append('%s_%s' % (c, v))
+
+    df_num = df[features]
+    df_num = df_num.fillna(0)
+    X = df_num.values
+    
+    return X
+
+X_train = prepare_X(df_train)
+w0, w = train_linear_regression(X_train, y_train)
+
+X_val = prepare_X(df_val)
+y_pred = w0 + X_val.dot(w)
+
+rmse(y_val, y_pred) #Made the model worse!
+
+#There could be duplicate - or almost duplicate columns in our data. We shouldnt be able to compute the inverse of it but since they are not exactly duplicates, python can and the results are huge numbers.
+# Add a small number to diagonal, to make it less possible of duplicate columns
+
+#Regularization - control w so they dont grow too much.
+
+def train_linear_regression_reg(X,y,r=0.001):
+    #Find the w vector
+    ones = np.ones(X.shape[0])
+    X = np.column_stack([ones, X])
+    
+    XTX = X.T.dot(X)
+    XTX = XTX + r * np.eye(XTX.shape[0])
+
+    XTX_inv = np.linalg.inv(XTX)
+    w_full = XTX_inv.dot(X.T).dot(y)
+
+    return w_full[0], w_full[1:]
+
+
+X_train = prepare_X(df_train)
+w0, w = train_linear_regression_reg(X_train, y_train)
+
+X_val = prepare_X(df_val)
+y_pred = w0 + X_val.dot(w)
+
+rmse(y_val, y_pred)
+
+#FIND THE BEST REGULARIZATION PARAMETER
+
+for r in [0.0, 0.00001, 0.0001, 0.001, 0.1, 1, 10]:
+    X_train = prepare_X(df_train)
+    w_0, w = train_linear_regression_reg(X_train, y_train, r=r)
+
+    X_val = prepare_X(df_val)
+    y_pred = w0 + X_val.dot(w)
+    score = rmse(y_val, y_pred)
+    print(r, w0, score)
+
+r=0.001
+X_train = prepare_X(df_train)
+w_0, w = train_linear_regression_reg(X_train, y_train, r=r)
+
+X_val = prepare_X(df_val)
+y_pred = w0 + X_val.dot(w)
+score = rmse(y_val, y_pred)
+score
+
+# Use the model
+df_full_train = pd.concat([df_train, df_val])
+df_full_train = df_full_train.reset_index(drop=True)
+
+X_full_train = prepare_X(df_full_train)
+
+X_full_train
+
+y_full_train = np.concatenate([y_train, y_val])
+w_0, w = train_linear_regression_reg(X_full_train, y_full_train, r=0.001)
+
+
+X_test = prepare_X(df_test)
+y_pred = w0 + X_test.dot(w)
+score = rmse(y_test, y_pred)
+score
+
+car = df_test.iloc[20].to_dict()
+
+df_small = pd.DataFrame([car])
+X_small = prepare_X(df_small)
+y_pred = w0 + X_small.dot(w)
+y_pred = y_pred[0]
+
+np.expm1(y_pred)
+np.expm1(y_test[20])
