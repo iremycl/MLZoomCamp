@@ -6,6 +6,7 @@ import os
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
 
 os.chdir("/Users/iremyucel/MLZoomCamp-1/04-evaluation")
 
@@ -68,8 +69,23 @@ val_dict = df_val[categorical + numerical].to_dict(orient='records')
 X_val = dv.transform(val_dict)
 
 y_pred = model.predict_proba(X_val)[:, 1]
-print(model.predict_proba(X_val))
+
 churn_decision = (y_pred >= 0.5)
 (y_val == churn_decision).mean()
 
+scores = []
+thresholds = np.linspace(0,1,21)
+for t in thresholds:
+    churn_decision = (y_pred >= t)
+    score=accuracy_score(y_val, y_pred >= t)
+    #score= (y_val == churn_decision).mean()
+    print('%.2f %.3f' % (t,score))
+    scores.append(score)
 
+plt.plot(thresholds, scores)
+
+actual_positive = (y_val ==1)
+actual_negative = (y_val ==0)
+
+predict_positive = (y_val ==1)
+predict_negative = (y_val ==0)
