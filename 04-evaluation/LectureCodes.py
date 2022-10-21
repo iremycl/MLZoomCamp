@@ -6,7 +6,7 @@ import os
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, confusion_matrix
 
 os.chdir("/Users/iremyucel/MLZoomCamp-1/04-evaluation")
 
@@ -87,5 +87,20 @@ plt.plot(thresholds, scores)
 actual_positive = (y_val ==1)
 actual_negative = (y_val ==0)
 
-predict_positive = (y_val ==1)
-predict_negative = (y_val ==0)
+t = .5
+predict_positive = (y_pred >=t)
+predict_negative = (y_pred <t)
+
+tp = (predict_positive & actual_positive).sum()
+tn = (predict_negative & actual_negative).sum()
+
+fp = (predict_positive & actual_negative).sum()
+fn = (predict_negative & actual_positive).sum()
+fn,fp
+
+cofusion_matrix = np.array([
+  [tn,fp],
+  [fn,tp]  
+])
+
+(cofusion_matrix/cofusion_matrix.sum()).round(2)
