@@ -195,3 +195,5 @@ plt.plot(df_rand.threshold,df_rand['tpr'], label = 'TPR' )
 plt.plot(df_rand.threshold,df_rand['fpr'], label = 'FPR' )
 plt.legend()
 
+## Ideal s coring model
+  
