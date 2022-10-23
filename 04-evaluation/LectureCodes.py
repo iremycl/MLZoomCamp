@@ -1,3 +1,4 @@
+from matplotlib.lines import lineStyles
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -197,3 +198,63 @@ plt.legend()
 
 ## Ideal s coring model
   
+num_neg = (y_val == 0).sum()
+num_pos = (y_val == 1).sum()
+num_neg, num_pos
+
+y_ideal = np.repeat([0, 1], [num_neg, num_pos])
+y_ideal
+
+y_ideal_pred = np.linspace(0, 1, len(y_val))
+1 - y_val.mean()
+
+accuracy_score(y_ideal, y_ideal_pred >= 0.726)
+
+df_ideal = tpr_fpr_dataframe(y_ideal, y_ideal_pred)
+df_ideal[::10]
+
+plt.plot(df_ideal.threshold, df_ideal['tpr'], label='TPR')
+plt.plot(df_ideal.threshold, df_ideal['fpr'], label='FPR')
+plt.legend()
+
+plt.plot(df_scores.threshold, df_scores['tpr'], label='TPR', color='black')
+plt.plot(df_scores.threshold, df_scores['fpr'], label='FPR', color='blue')
+
+plt.plot(df_ideal.threshold, df_ideal['tpr'], label='TPR ideal')
+plt.plot(df_ideal.threshold, df_ideal['fpr'], label='FPR ideal')
+plt.legend() 
+
+##Scikit learn
+
+from sklearn.metrics import roc_curve
+fpr, tpr, thresholds = roc_curve(y_val, y_pred)
+
+plt.plot(fpr, tpr, label='Model')
+plt.plot([0,1], [0,1], label='Random', linestyle = '--')
+plt.xlabel('FPR')  
+plt.ylabel('TPR') 
+plt.legend() 
+
+##4.6 ROC AUC
+from sklearn.metrics import auc
+auc(fpr, tpr)
+auc(df_ideal.fpr, df_ideal.tpr)
+
+fpr, tpr, thresholds = roc_curve(y_val, y_pred)
+auc(fpr,tpr)
+
+from sklearn.metrics import roc_auc_score
+roc_auc_score(y_val, y_pred)
+
+neg = y_pred[y_val == 0]
+pos = y_pred[y_val == 1]
+
+import random
+n=100000
+success = 0 
+for i in range(n):
+    pos_ind = random.randint(0,len(pos) - 1)
+    neg_ind = random.randint(0,len(neg) - 1)
+    if pos[pos_ind] > neg[neg_ind]:
+        success += 1
+success / n
