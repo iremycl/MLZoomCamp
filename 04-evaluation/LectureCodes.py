@@ -258,3 +258,32 @@ for i in range(n):
     if pos[pos_ind] > neg[neg_ind]:
         success += 1
 success / n
+
+n = 50000
+np.random.seed(1)
+pos_ind = np.random.randint(0, len(pos), size = n )
+neg_ind = np.random.randint(0, len(neg), size = n )
+(pos[pos_ind] > neg[neg_ind]).mean()
+
+##4.7 Cross-Validation
+
+def train(df_train,y_train):
+    dicts = df_train[categorical+numerical].to_dict(orient='records')
+    
+    dv = DictVectorizer(sparse=False)
+    X_train = dv.fit_transform(dicts)
+    
+    model = LogisticRegression()
+    model.fit(X_train, y_train)
+
+    return dv, model
+
+dv, model = train(df_train, y_train)
+
+def predict(df, dv, model):
+    dicts = df_train[categorical+numerical].to_dict(orient='records')
+
+    X = dv.transform(dicts)
+    y_pred = model.predict_proba(X)[:, 1]
+
+    return y_pred
