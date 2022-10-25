@@ -267,23 +267,67 @@ neg_ind = np.random.randint(0, len(neg), size = n )
 
 ##4.7 Cross-Validation
 
-def train(df_train,y_train):
+
+def train(df_train,y_train, C=1.0):
     dicts = df_train[categorical+numerical].to_dict(orient='records')
     
     dv = DictVectorizer(sparse=False)
     X_train = dv.fit_transform(dicts)
     
-    model = LogisticRegression()
+    model = LogisticRegression(C=C, max_iter=1000)
     model.fit(X_train, y_train)
 
     return dv, model
 
-dv, model = train(df_train, y_train)
+dv, model = train(df_train, y_train, C = 0.001)
 
 def predict(df, dv, model):
-    dicts = df_train[categorical+numerical].to_dict(orient='records')
+    dicts = df[categorical+numerical].to_dict(orient='records')
 
     X = dv.transform(dicts)
     y_pred = model.predict_proba(X)[:, 1]
 
-    return y_pred
+    return y_pred 
+
+y_pred=predict(df_val, dv, model)
+
+from sklearn.model_selection import KFold
+
+kfold = KFold(n_splits=10, shuffle = True, random_state=1)
+#train_idx, val_idx = next(kfold.split(df_full_train)) #Returns indices
+#
+#len(train_idx),len(val_idx)
+#df_train = df_full_train.iloc[train_idx]
+#df_val = df_full_train.iloc[val_idx]
+
+#Put the code in the loop:
+
+from tqdm.auto import tqdm
+
+n_splits = 5
+for C in tqdm([0.001, 0.01, 0.1, 0.5, 1, 5, 10]):
+
+    scores = []
+
+    kfold = KFold(n_splits=n_splits, shuffle = True, random_state=1)
+    for train_idx, val_idx in kfold.split(df_full_train):
+        df_train = df_full_train.iloc[train_idx]
+        df_val = df_full_train.iloc[val_idx]
+
+        y_train = df_train.churn.values
+        y_val = df_val.churn.values
+
+        dv, model = train(df_train, y_train, C=C)
+        y_pred = predict(df_val, dv, model)
+
+        auc = roc_auc_score(y_val, y_pred)
+        scores.append(auc)
+
+    print('C=%s %.3f +- %.3f' %(C, np.mean(scores), np.std(scores)))
+
+dv, model = train(df_full_train, df_full_train.churn.values, C=1.0)
+y_pred = predict(df_test, dv, model)
+
+auc = roc_auc_score(y_test, y_pred)
+auc
+
