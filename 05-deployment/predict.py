@@ -1,5 +1,5 @@
 # Load model
-
+import pickle
 
 #After restarting the kernel
 model_file = 'model_C=1.0.bin'
@@ -33,8 +33,10 @@ customer = {
 
 X = dv.transform([customer])
 
-model.predict_proba(X)[0,1] # Prob that this customer will churn
+y_pred = model.predict_proba(X)[0,1] # Prob that this customer will churn
 
+print('input', customer)
+print('churn probability', y_pred)
 #Convert all this notebook to single python file that does all these:
 #Download as python file
 

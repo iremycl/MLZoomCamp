@@ -85,7 +85,7 @@ def predict(df, dv, model):
     return y_pred
 
 #validation
-print('doing validateion with C={C}')
+print(f'doing validateion with C={C}')
 kfold = KFold(n_splits=n_splits, shuffle=True, random_state=1)
 
 scores = []
@@ -102,7 +102,7 @@ for train_idx, val_idx in kfold.split(df_full_train):
 
     auc = roc_auc_score(y_val, y_pred)
     scores.append(auc)
-    print('auc on fold {fold} is {auc}')
+    print(f'auc on fold {fold} is {auc}')
     fold += 1
 
 print('validation results:')
@@ -115,7 +115,7 @@ y_pred = predict(df_test, dv, model)
 y_test = df_test.churn.values
 auc = roc_auc_score(y_test, y_pred)
 
-print('auc={auc}')
+print(f'auc={auc}')
 
 
 #Take this model and put it in a web service
@@ -129,4 +129,4 @@ f_out.close()
 
 with open(output_file, 'wb') as f_out:
     pickle.dump((dv,model),f_out)
-print('the model is saved to {output_file}')
+print(f'the model is saved to {output_file}')
