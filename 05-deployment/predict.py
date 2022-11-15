@@ -20,8 +20,8 @@ def predict(): # Turn this into a web service!
     churn = y_pred >= 0.5
 
     result = {
-        'churn_probability': float(y_pred),
-        'churn': bool(churn) # #bool error, as json does not know how to turn the numpy boolean to text, but it does know how to turn python bool to text, so add bool to return in predict.py
+        'churn_probability': float(y_pred), # float turns it into pythonfloat, otherwise its float - float64
+        'churn': bool(churn) # bool error, as json does not know how to turn the numpy boolean to text, but it does know how to turn python bool to text, so add bool to return in predict.py
     }
     return jsonify(result) #Response also will be in json.
     
@@ -29,3 +29,6 @@ app.run(debug=True, host='0.0.0.0', port=9696)
 
 if __name__=='__main__':
     app.run(debug=True, host='0.0.0.0', port=9696)
+
+# WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+# For this you can use gunicorn - pip install gunicorn
